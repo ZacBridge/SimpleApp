@@ -1,7 +1,7 @@
 {
-  "name": "SimpleApplication",
+  "name": "SimpleApp",
   "version": "1.0.0",
-  "description": "Simple blog post application using ASP for API calls. ",
+  "description": "Simple Blog Post app with ASP API",
   "main": "index.js",
   "repository": "git@github.com/ZacBridge/SimpleApp.git",
   "scripts": {
