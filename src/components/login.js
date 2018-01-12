@@ -120,8 +120,8 @@ renderPosts() {
         <div key={post.id} className="list-group-item">
           <li className="text-center" data-id={post.id}>
             <h3>{post.title}</h3>
-            <h6>Categories: {post.categories}</h6>
-            <p>{post.content}</p>
+            <h6>Categories: {post.category}</h6>
+            <p>{post.message}</p>
               <button
                 className="btn btn-danger"
                 onClick={this.onDeleteClick.bind(this, post.id)}>

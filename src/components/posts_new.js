@@ -42,12 +42,12 @@ class PostsNew extends Component {
         />
         <Field
           label="Categories"
-          name="categories"
+          name="category"
           component={this.renderField}
         />
         <Field
           label="Post Content"
-          name="content"
+          name="message"
           component={this.renderField}
         />
         <button
@@ -68,11 +68,11 @@ function validate(values) {
     errors.title = "Enter a title!";
   }
   if (!values.categories) {
-    errors.categories = "Enter a category!";
+    errors.category = "Enter a category!";
   }
 
   if (!values.content) {
-    errors.content = "Enter some content!";
+    errors.message = "Enter some content!";
   }
   return errors;
 }
