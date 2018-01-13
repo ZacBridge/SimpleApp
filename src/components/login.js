@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Link } from 'react-router-dom';
 
-import * as actions from '../actions/index';
+import * as actions from '../actions/postActions';
 import * as loginActions from '../actions/loginAction';
 import { firebaseApp } from '../firebase';
 import PostsNew from './posts_new';
@@ -33,40 +33,39 @@ componentWillMount() {
     this.state = {
       email: '',
       password: '',
-      isAuth: 'false'
+      isAuth: 'false',
+      error: {
+        message: ''
+      }
     }
   }
 
 onSubmit() {
-  console.log('this.state', this.state);
   const { email, password } = this.state;
-  console.log('onSubmit method hit');
 
   firebaseApp.auth().signInWithEmailAndPassword(email,password)
-  .catch(function(error) {
-    var errorCode = error.code;
-    var errorMessage = error.message;
-    console.log("Error message"  + errorMessage);
-    console.log("Attempting to create account");
+  .catch(error => {
+    this.state.error.message = error.message;
+
     firebaseApp.auth().createUserWithEmailAndPassword(email, password)
-      .catch(function(error) {
-        console.log('FAILED CREATING ACCOUNT');
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        console.log("Error Message: "  + errorMessage);
+      .catch(error => {
+        this.state.error.message = error.message;
       })
   })
 }
 
 signOut(){
   firebaseApp.auth().signOut();
-  console.log('signed out!')
 }
 
 renderContent()
 {
   return (
       <div>
+        <div>
+        {this.state.error.message == ''
+        ? <h1></h1>
+        : <h1 className="alert alert-danger">{this.state.error.message}</h1> }</div>
         <div><h1>You are not logged in. Please login here:</h1></div>
         <div>
           <div className="row">
@@ -104,7 +103,6 @@ renderContent()
 }
 
 onDeleteClick(id) {
-  console.log('ondeleteclick hit')
   const { deletePost } = this.props.actions;
     deletePost(id)
       this.props.history.push('/');
@@ -115,7 +113,6 @@ renderPosts() {
 
   if (allPosts !== null) {
     return _.map(allPosts, (post) => {
-      console.log('banter', post.id)
       return (
         <div key={post.id} className="list-group-item">
           <li className="text-center" data-id={post.id}>
