@@ -18,6 +18,7 @@ export const fetchPosts = () => {
   export const deletePost = (id) => {
     return (dispatch) => {
       axios.delete(`${ROOT_URL}/${id}`)
+    //.then(() => callback());
     .then(response => {
       dispatch({ type: DELETE_POST, payload: response.data});
     })

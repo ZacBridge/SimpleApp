@@ -38,22 +38,29 @@ componentWillMount() {
   }
 
 onSubmit() {
+  console.log('this.state', this.state);
   const { email, password } = this.state;
+  console.log('onSubmit method hit');
 
   firebaseApp.auth().signInWithEmailAndPassword(email,password)
   .catch(function(error) {
     var errorCode = error.code;
     var errorMessage = error.message;
+    console.log("Error message"  + errorMessage);
+    console.log("Attempting to create account");
     firebaseApp.auth().createUserWithEmailAndPassword(email, password)
       .catch(function(error) {
+        console.log('FAILED CREATING ACCOUNT');
         var errorCode = error.code;
         var errorMessage = error.message;
+        console.log("Error Message: "  + errorMessage);
       })
   })
 }
 
 signOut(){
   firebaseApp.auth().signOut();
+  console.log('signed out!')
 }
 
 renderContent()
@@ -97,6 +104,7 @@ renderContent()
 }
 
 onDeleteClick(id) {
+  console.log('ondeleteclick hit')
   const { deletePost } = this.props.actions;
     deletePost(id)
       this.props.history.push('/');
@@ -107,6 +115,7 @@ renderPosts() {
 
   if (allPosts !== null) {
     return _.map(allPosts, (post) => {
+      console.log('banter', post.id)
       return (
         <div key={post.id} className="list-group-item">
           <li className="text-center" data-id={post.id}>
