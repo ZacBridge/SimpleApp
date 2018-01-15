@@ -3,13 +3,14 @@ import { FETCH_POSTS, FETCH_POST, DELETE_POST } from '../actions/types';
 
 const INITIAL_STATE = {
   loading: true,
-  allPosts: []
+  allPosts: [],
+  postDeleted: true,
 }
 
 export default (state = {}, action) => {
   switch (action.type) {
     case DELETE_POST:
-      return _.omit(state, action.payload);
+        return Object.assign({}, state, { postDeleted: true })
     case FETCH_POSTS:
       return { ...state, loading: false, allPosts: action.payload };
     default:

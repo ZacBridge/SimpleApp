@@ -8,21 +8,31 @@ import * as actions from '../actions/postActions';
 import * as loginActions from '../actions/loginAction';
 import { firebaseApp } from '../firebase';
 import PostsNew from './posts_new';
+import { Footer } from './index';
+
+import FontIcon from 'material-ui/FontIcon';
+import AppBar from 'material-ui/AppBar';
+import RaisedButton from 'material-ui/RaisedButton';
+import TextField from 'material-ui/TextField';
+import FlatButton from 'material-ui/FlatButton';
+import Paper from 'material-ui/Paper';
 
 class Login extends Component {
 
-componentWillMount() {
-    const { fetchPosts } = this.props.actions;
-    const { userLogIn } = this.props.logActions;
 
+componentWillMount() {
+    const { userLogIn, userLogOut  } = this.props.logActions;
+    const { fetchPosts } = this.props.actions;
     firebaseApp.auth().onAuthStateChanged((user) => {
       if (user) {
         userLogIn(user.email);
         fetchPosts();
+        this.setState({ email: '', password: '', title: 'Posts' })
       }
       else
       {
-        console.log('user has signed out or isnt logged in');
+        userLogOut();
+        this.setState({ title: 'Log In' })
       }
     });
 }
@@ -34,78 +44,110 @@ componentWillMount() {
       email: '',
       password: '',
       isAuth: 'false',
-      error: {
-        message: ''
-      }
+      errorUser: '',
+      errorPass: '',
+      postDeleted: 'true',
+      title: 'Log in',
+      selectedIndex: 0,
     }
+
+
   }
 
 onSubmit() {
   const { email, password } = this.state;
 
   firebaseApp.auth().signInWithEmailAndPassword(email,password)
-  .catch(error => {
-    this.state.error.message = error.message;
-
-    firebaseApp.auth().createUserWithEmailAndPassword(email, password)
-      .catch(error => {
-        this.state.error.message = error.message;
-      })
-  })
+    .catch(err => {
+      this.state.error.message = err.message;
+      firebaseApp.auth().createUserWithEmailAndPassword(email, password)
+        .catch(err => {
+          this.state.error.message = err.message;
+        })
+    });
 }
 
 signOut(){
-  firebaseApp.auth().signOut();
+  firebaseApp.auth().signOut()
+    .then(() => {
+      console.log('sign out then hit')
+      this.setState({ isAuth: 'false'});
+      console.log('sign out then hit2')
+    })
 }
 
-renderContent()
-{
+onChange(event) {
+  this.setState({ [event.target.name]: event.target.value });
+
+  if (event.target.name == 'email' && event.target.value === '')
+  {
+    this.setState({errorUser: 'Email is incorrect'});
+  }
+  else
+  {
+    this.setState({errorUser: ''})
+  }
+
+  if (event.target.name == 'password' && event.target.value === '')
+  {
+    this.setState({errorPass: "Password is incorrect"});
+  }
+  else
+  {
+    this.setState({errorPass: ''})
+  }
+
+}
+
+renderContent() {
   return (
-      <div>
         <div>
-        {this.state.error.message == ''
-        ? <h1></h1>
-        : <h1 className="alert alert-danger">{this.state.error.message}</h1> }</div>
-        <div><h1>You are not logged in. Please login here:</h1></div>
-        <div>
-          <div className="row">
-            <div className="input-field col s12">
-              <label>
-                <input
-                  name="email"
-                  type="text"
+          <div className="col-md-4" />
+          <div className="col-md-4">
+          <Paper style={styles.loginContainer} zDepth={5}>
+            <div className='row'>
+                <TextField
+                  textareaStyle={styles.loginButtonStyle}
+                  hintText='user@domain.com'
+                  name='email'
                   value={this.state.email}
-                  onChange={event => this.setState({email: event.target.value})}
-                  placeholder="user@domain.com" />
-              </label>
+                  onChange={this.onChange.bind(this)}
+                  errorText={this.state.errorUser}
+                  floatingLabelText='Email address'/>
             </div>
-          </div>
 
-          <div className="row">
-            <div className="input-field col s12">
-              <label>
-                <input
-                  name="password"
-                  type="password"
-                  value={this.state.password}
-                  onChange={event => this.setState({password: event.target.value})} />
-              </label>
+            <div className="row">
+              <TextField
+                hintText='********'
+                name='password'
+                type='password'
+                value={this.state.password}
+                onChange={this.onChange.bind(this)}
+                errorText={this.state.errorPass}
+                floatingLabelText='Password'/>
             </div>
-          </div>
 
-          <input
-            onClick={() => this.onSubmit()}
-            type="submit"
-            value="Log in" />
+            <div className="row">
+                <RaisedButton primary
+                style = {styles.loginButtonStyle}
+                onClick={() => this.onSubmit()}
+                label = 'Log in' />
           </div>
+        </Paper>
+        <div className="col-md-4" />
+        </div>
       </div>
   )
 }
 
 onDeleteClick(id) {
-  const { deletePost } = this.props.actions;
-    deletePost(id)
-      this.props.history.push('/');
+  const { deletePost, fetchPosts } = this.props.actions;
+    deletePost(id);
+    //{this.props}
+    this.setState({ postDeleted: this.props.isDeleted })
+    fetchPosts();
+      //this.props.history.push('/');
+
 }
 
 renderPosts() {
@@ -130,43 +172,86 @@ renderPosts() {
   }
 }
 
+
 render() {
   const { loading } = this.props.posts;
+
+
+
+
   return (
     <div>
-      {!this.props.isAuth
-        ?
-        <div>{this.renderContent()}</div>
-        :
-        <div>
-          <h1>User logged in. View your posts!</h1>
-          <div>
-            <div className="text-xs-right">
-              <Link className="btn btn-primary" to="/new">
-                Add Post
+      <div className="col-md-12">
+        <AppBar
+            title={this.state.title}
+            titleStyle={styles.appBarStyle.titleStyle}
+            showMenuIconButton={false}
+            iconElementRight={
+              !this.props.isAuth
+              ?
+              <div></div>
+              :
+              <div>
+              <Link to="/new">
+                <FlatButton
+                  style={styles.appBarStyle.rightIconStyle}
+                  label="Add Post" />
               </Link>
-              <button
-              className="btn btn-success"
-              onClick={() => this.signOut()}>
-                Sign out
-              </button>
-            </div>
+                <FlatButton
+                  style={styles.appBarStyle.rightIconStyle}
+                  label="Sign Out"
+                  onClick={() => this.signOut()} />
+              </div>
+            } />
+        {!this.props.isAuth
+          ?
+          <div>{this.renderContent()}</div>
+          :
+          <div>
+            <ul className="list-group">
+              {!loading ? this.renderPosts() : <p>Loading...</p>}
+            </ul>
           </div>
-          <h3>Posts </h3>
-          <ul className="list-group">
-            {!loading ? this.renderPosts() : <p>Loading...</p>}
-          </ul>
-        </div>
-      }
+        }
+      </div>
+      <Footer />
     </div>
+
+
   )
   }
 }
 
+const styles = {
+  storeme: {
+    height: '100% !important'
+    //height: 'calc(100% - 500px)'
+  },
+  loginContainer: {
+    marginTop: '50px',
+    paddingBottom: '50px',
+    textAlign: 'center'
+  },
+  loginButtonStyle: {
+    justifyContent: "center",
+  },
+  appBarStyle: {
+    titleStyle: {
+      textAlign: 'center'
+    },
+    rightIconStyle: {
+      color: 'white'
+    },
+  }
+
+}
+
+
 export default connect(
   state => ({
     isAuth: state.loginReducer.authenticated,
-    posts: state.postsReducer
+    posts: state.postsReducer,
+    isDeleted: state.postsReducer.postDeleted,
   }),
   dispatch => ({
     actions: bindActionCreators(actions, dispatch),
