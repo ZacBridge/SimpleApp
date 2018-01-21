@@ -55,24 +55,22 @@ componentWillMount() {
   }
 
 onSubmit() {
-  const { email, password } = this.state;
+  const { email, password, error } = this.state;
 
   firebaseApp.auth().signInWithEmailAndPassword(email,password)
     .catch(err => {
-      this.state.error.message = err.message;
+      console.log(err)
       firebaseApp.auth().createUserWithEmailAndPassword(email, password)
-        .catch(err => {
-          this.state.error.message = err.message;
-        })
+      .catch(err => {
+        console.log(err)
+  })
     });
 }
 
 signOut(){
   firebaseApp.auth().signOut()
     .then(() => {
-      console.log('sign out then hit')
       this.setState({ isAuth: 'false'});
-      console.log('sign out then hit2')
     })
 }
 
@@ -146,7 +144,6 @@ onDeleteClick(id) {
     //{this.props}
     this.setState({ postDeleted: this.props.isDeleted })
     fetchPosts();
-      //this.props.history.push('/');
 
 }
 
@@ -156,65 +153,71 @@ renderPosts() {
   if (allPosts !== null) {
     return _.map(allPosts, (post) => {
       return (
-        <div key={post.id} className="list-group-item">
-          <li className="text-center" data-id={post.id}>
-            <h3>{post.title}</h3>
-            <h6>Categories: {post.category}</h6>
-            <p>{post.message}</p>
-              <button
-                className="btn btn-danger"
-                onClick={this.onDeleteClick.bind(this, post.id)}>
-                  Delete Post
-              </button>
-          </li>
+        <div className="row">
+          <div className="col-md-4"></div>
+            <div key={post.id} className="col-md-4">
+              <Paper style={styles.postContainer } zDepth={5}>
+                <li className="text-center list-unstyled" data-id={post.id}>
+                  <h3>{post.title}</h3>
+                  <h6>Categories: {post.category}</h6>
+                  <p>{post.message}</p>
+                    <button
+                      className="btn btn-danger"
+                      onClick={this.onDeleteClick.bind(this, post.id)}>
+                        Delete Post
+                    </button>
+                </li>
+              </Paper>
+            </div>
+          <div className="col-md-4"></div>
         </div>
+
       )})
   }
 }
 
-
 render() {
   const { loading } = this.props.posts;
-
-
-
-
   return (
     <div>
-      <div className="col-md-12">
-        <AppBar
-            title={this.state.title}
-            titleStyle={styles.appBarStyle.titleStyle}
-            showMenuIconButton={false}
-            iconElementRight={
-              !this.props.isAuth
-              ?
-              <div></div>
-              :
-              <div>
-              <Link to="/new">
-                <FlatButton
-                  style={styles.appBarStyle.rightIconStyle}
-                  label="Add Post" />
-              </Link>
-                <FlatButton
-                  style={styles.appBarStyle.rightIconStyle}
-                  label="Sign Out"
-                  onClick={() => this.signOut()} />
-              </div>
-            } />
-        {!this.props.isAuth
+    <AppBar
+        style={styles.appBarStyle.style}
+        title={this.state.title}
+        titleStyle={styles.appBarStyle.titleStyle}
+        showMenuIconButton={false}
+        iconElementRight={
+          !this.props.isAuth
           ?
-          <div>{this.renderContent()}</div>
+          <div></div>
           :
           <div>
-            <ul className="list-group">
-              {!loading ? this.renderPosts() : <p>Loading...</p>}
-            </ul>
+          <Link to="/new">
+            <FlatButton
+              style={styles.appBarStyle.rightIconStyle}
+              label="Add Post" />
+          </Link>
+            <FlatButton
+              style={styles.appBarStyle.rightIconStyle}
+              label="Sign Out"
+              onClick={() => this.signOut()} />
           </div>
-        }
+        } />
+      <div>
+          <div className="col-md-12">
+            {!this.props.isAuth
+              ?
+              <div>{this.renderContent()}</div>
+              :
+              <div>
+                <ul className="list-group">
+                  {!loading ? this.renderPosts() : <p>Loading...</p>}
+                </ul>
+              </div>
+            }
+          </div>
       </div>
-      <Footer />
+      <div className="row" style={styles.filler} />
+        <Footer />
     </div>
 
 
@@ -223,24 +226,39 @@ render() {
 }
 
 const styles = {
-  storeme: {
-    height: '100% !important'
-    //height: 'calc(100% - 500px)'
+  filler: {
+    paddingBottom: '150px',
+    margin: '0px',
   },
   loginContainer: {
     marginTop: '50px',
     paddingBottom: '50px',
-    textAlign: 'center'
+    textAlign: 'center',
+  },
+  postContainer: {
+    marginTop: '50px',
+    marginLeft: '50px',
+    marginBottom: '20px',
+    paddingBottom: '20px',
+    paddingTop: '20px',
+    textAlign: 'center',
+    //width: '50%',
+    justifyContent: 'center'
   },
   loginButtonStyle: {
     justifyContent: "center",
   },
   appBarStyle: {
+    style: {
+      backgroundColor: '#fff',
+      width: '100%',
+      margin: '0px'
+    },
     titleStyle: {
-      textAlign: 'center'
+      textAlign: 'center',
+      color: 'black'
     },
     rightIconStyle: {
-      color: 'white'
     },
   }
 

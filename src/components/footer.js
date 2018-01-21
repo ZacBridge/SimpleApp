@@ -46,12 +46,12 @@ const styles = {
     width: '50px'
   },
   footer: {
-    position: 'absolute',
+    position: 'fixed',
     left: '0',
     bottom: '0',
     right: '0',
     margin: '0',
-    paddingBottom:  '50px'
+    padding: '0',
   }
 }
 
